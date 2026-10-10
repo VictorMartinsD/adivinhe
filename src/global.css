@@ -1,3 +1,7 @@
+:root {
+  font-size: 16px;
+}
+
 *,
 *::before,
 *::after {
@@ -6,6 +10,7 @@
 
 * {
   margin: 0;
+  padding: 0;
 }
 
 html,
@@ -37,6 +42,11 @@ select {
 
 button {
   cursor: pointer;
+  transition: filter 0.2s;
+}
+
+button:hover {
+  filter: brightness(0.9);
 }
 
 ul,
@@ -49,9 +59,9 @@ a {
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-text);
-  font-family: var(--font-family-base);
+  background-color: #f5f5fa;
+  font-family: "Noto Sans", serif;
+  font-optical-sizing: auto;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
