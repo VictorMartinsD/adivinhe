@@ -61,11 +61,14 @@ a {
 body {
   background-color: #f5f5fa;
   font-family: "Noto Sans", serif;
-  font-optical-sizing: auto;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
+}
+
+.input {
+  font-family: "Noto Sans", serif;
 }
