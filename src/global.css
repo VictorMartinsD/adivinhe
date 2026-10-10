@@ -69,6 +69,7 @@ body {
     color 0.2s ease;
 }
 
-.input {
+input,
+button {
   font-family: "Noto Sans", serif;
 }
