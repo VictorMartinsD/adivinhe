@@ -10,6 +10,13 @@ import { LettersUsed, type LettersUsedProps } from "@/components/LettersUsed";
 
 const ATTEMPTS_MARGIN = 5;
 
+function sanitizeLetterInput(value: string) {
+  const withoutAccents = value.normalize("NFD").replace(/\p{M}/gu, "");
+  const asciiLetters = withoutAccents.replace(/[^A-Za-z]/g, "");
+
+  return asciiLetters.slice(0, 1).toUpperCase();
+}
+
 export default function App() {
   const [score, setScore] = useState(0);
   const [letter, setLetter] = useState("");
@@ -68,7 +75,7 @@ export default function App() {
       return;
     }
 
-    if (!letter.trim()) {
+    if (!letter || !/^[A-Z]$/.test(letter)) {
       showWarning("Digite uma letra!", "empty");
       focusInput();
       return;
@@ -155,6 +162,7 @@ export default function App() {
         />
 
         <Tip tip={challenge.tip} />
+        <p className={styles.accentNote}>Acentos e cedilha é opcional</p>
 
         <div className={styles.word}>
           {challenge.word.split("").map((letter, index) => {
@@ -171,16 +179,16 @@ export default function App() {
           onSubmit={(event) => {
             event.preventDefault();
             HandleConfirm();
-          }}
-        >
+          }}>
           <Input
             ref={inputRef}
             autoFocus
             maxLength={1}
             placeholder="?"
             value={letter}
+            pattern="[A-Za-z]"
             onChange={(e) => {
-              const value = e.target.value;
+              const value = sanitizeLetterInput(e.target.value);
               setLetter(value);
 
               if (warningType === "empty" && value.trim()) {
@@ -202,8 +210,7 @@ export default function App() {
               key={warningAnimationKey}
               className={`${styles.warning} ${warningType === "success" ? styles.success : ""}`}
               role="status"
-              aria-live="polite"
-            >
+              aria-live="polite">
               {warning}
             </span>
           )}

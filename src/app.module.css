@@ -19,6 +19,14 @@
   border-radius: 0.75rem;
 }
 
+.accentNote {
+  color: #6363db;
+  font-size: 0.75rem;
+  text-align: center;
+  line-height: 1;
+  margin-top: 0.5rem;
+}
+
 .container .word {
   width: 100%;
   display: flex;
