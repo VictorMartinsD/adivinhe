@@ -31,6 +31,36 @@
 
 .guess {
   display: flex;
+  align-items: center;
   gap: 0.75rem;
   margin-top: 0.75rem;
+}
+
+.warning {
+  color: #d93636;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  animation: warning-blink 0.45s ease-in-out 1;
+}
+
+.success {
+  color: #03ab4f;
+}
+
+@keyframes warning-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .warning {
+    animation-duration: 0.01ms;
+  }
 }

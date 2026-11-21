@@ -15,11 +15,28 @@ export default function App() {
   const [letter, setLetter] = useState("");
   const [lettersUsed, setLettersUsed] = useState<LettersUsedProps[]>([]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [warning, setWarning] = useState("");
+  const [warningType, setWarningType] = useState<"error" | "empty" | "duplicate" | "success">("error");
+  const [duplicateLetter, setDuplicateLetter] = useState("");
+  const [warningAnimationKey, setWarningAnimationKey] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const incorrectAttempts = lettersUsed.filter((used) => !used.correct).length;
 
   function focusInput() {
     requestAnimationFrame(() => inputRef.current?.focus());
+  }
+
+  function showWarning(message: string, type: "error" | "empty" | "duplicate" | "success" = "error", letterValue = "") {
+    setWarning(message);
+    setWarningType(type);
+    setDuplicateLetter(type === "duplicate" ? letterValue : "");
+    setWarningAnimationKey((current) => current + 1);
+  }
+
+  function clearWarning() {
+    setWarning("");
+    setWarningType("error");
+    setDuplicateLetter("");
   }
 
   function handleRestartGame() {
@@ -41,6 +58,9 @@ export default function App() {
     setScore(0);
     setLetter("");
     setLettersUsed([]);
+    setWarning("");
+    setWarningType("error");
+    setDuplicateLetter("");
   }
 
   function HandleConfirm() {
@@ -49,7 +69,7 @@ export default function App() {
     }
 
     if (!letter.trim()) {
-      alert("Digite uma letra!");
+      showWarning("Digite uma letra!", "empty");
       focusInput();
       return;
     }
@@ -59,7 +79,7 @@ export default function App() {
 
     if (exists) {
       setLetter("");
-      alert("Você já utilizou a letra " + value);
+      showWarning("Você já utilizou a letra " + value, "duplicate", value);
       focusInput();
       return;
     }
@@ -78,14 +98,13 @@ export default function App() {
     focusInput();
   }
 
-  function endGame(message: string) {
-    alert(message);
-    startGame();
-    focusInput();
-  }
-
   useEffect(() => {
-    startGame();
+    const index = Math.floor(Math.random() * WORDS.length);
+    setChallenge(WORDS[index]);
+    setScore(0);
+    setLetter("");
+    setLettersUsed([]);
+    setWarning("");
   }, []);
 
   useEffect(() => {
@@ -93,18 +112,34 @@ export default function App() {
       return;
     }
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (score === challenge.word.length) {
-        return endGame("Parabéns, você descobriu a palavra!");
+        showWarning("Parabéns, você descobriu a palavra!", "success");
+      } else {
+        const attemptLimit = challenge.word.length + ATTEMPTS_MARGIN;
+
+        if (incorrectAttempts === attemptLimit) {
+          setWarning("Que pena, você usou todas as tentativas!");
+          setWarningType("error");
+          setDuplicateLetter("");
+          setWarningAnimationKey((current) => current + 1);
+        } else {
+          return;
+        }
       }
 
-      const attemptLimit = challenge.word.length + ATTEMPTS_MARGIN;
-
-      if (incorrectAttempts === attemptLimit) {
-        return endGame("Que pena, você usou todas as tentativas!");
-      }
+      setTimeout(() => {
+        const index = Math.floor(Math.random() * WORDS.length);
+        setChallenge(WORDS[index]);
+        setScore(0);
+        setLetter("");
+        setLettersUsed([]);
+        setWarning("");
+      }, 1200);
     }, 200);
-  }, [score, incorrectAttempts]);
+
+    return () => clearTimeout(timeoutId);
+  }, [challenge, score, incorrectAttempts]);
 
   if (!challenge) {
     return;
@@ -144,9 +179,34 @@ export default function App() {
             maxLength={1}
             placeholder="?"
             value={letter}
-            onChange={(e) => setLetter(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setLetter(value);
+
+              if (warningType === "empty" && value.trim()) {
+                clearWarning();
+              }
+
+              if (warningType === "duplicate") {
+                const normalizedValue = value.trim().toUpperCase();
+
+                if (normalizedValue && normalizedValue !== duplicateLetter) {
+                  clearWarning();
+                }
+              }
+            }}
           />
           <Button title="Confirmar" type="submit" />
+          {warning && (
+            <span
+              key={warningAnimationKey}
+              className={`${styles.warning} ${warningType === "success" ? styles.success : ""}`}
+              role="status"
+              aria-live="polite"
+            >
+              {warning}
+            </span>
+          )}
         </form>
 
         <LettersUsed data={lettersUsed} />
