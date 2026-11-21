@@ -73,3 +73,8 @@ input,
 button {
   font-family: "Noto Sans", serif;
 }
+
+:focus-visible {
+  outline: 3px solid rgb(99 99 219 / 35%);
+  outline-offset: 2px;
+}

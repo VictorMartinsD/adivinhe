@@ -125,6 +125,12 @@
   font-weight: 700;
 }
 
+.modalActions button:focus-visible,
+.modalShortcuts kbd:focus-visible {
+  outline: 3px solid rgb(99 99 219 / 35%);
+  outline-offset: 2px;
+}
+
 .cancelButton {
   border: 2px solid #6363db;
   background-color: #ffffff;
@@ -135,6 +141,46 @@
   border: 2px solid #d27513;
   background-color: #e8891c;
   color: #ffffff;
+}
+
+.modalShortcuts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  justify-content: center;
+  align-items: start;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e1e1f0;
+  color: #77778c;
+  font-size: 0.75rem;
+}
+
+.modalShortcutsLabel {
+  white-space: nowrap;
+}
+
+.modalShortcutLines {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.modalShortcuts kbd {
+  min-width: 1.75rem;
+  display: inline-block;
+  margin-right: 0.2rem;
+  padding: 0.08rem 0.35rem;
+  border: 1px solid #c9c9d8;
+  border-bottom-width: 2px;
+  border-radius: 0.25rem;
+  background-color: #f5f5fa;
+  color: #4f4f67;
+  font-size: 0.75rem;
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 @media (max-width: 35rem) {

@@ -28,6 +28,8 @@ export default function App() {
   const [warningAnimationKey, setWarningAnimationKey] = useState(0);
   const [isRestartModalOpen, setIsRestartModalOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const incorrectAttempts = lettersUsed.filter((used) => !used.correct).length;
   const remainingAttempts = challenge ? challenge.word.length + ATTEMPTS_MARGIN - incorrectAttempts : 0;
 
@@ -155,6 +157,84 @@ export default function App() {
     return () => clearTimeout(timeoutId);
   }, [challenge, score, incorrectAttempts]);
 
+  useEffect(() => {
+    if (!isRestartModalOpen) {
+      return;
+    }
+
+    cancelButtonRef.current?.focus();
+
+    function handleModalKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setIsRestartModalOpen(false);
+        focusInput();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const focusableElements = modalRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])");
+
+      if (!focusableElements?.length) {
+        event.preventDefault();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+      const activeElementIsInside = modalRef.current?.contains(activeElement);
+
+      if (!activeElementIsInside) {
+        event.preventDefault();
+        (event.shiftKey ? lastElement : firstElement).focus();
+        return;
+      }
+
+      if (event.shiftKey && activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleModalKeyDown);
+
+    return () => document.removeEventListener("keydown", handleModalKeyDown);
+  }, [isRestartModalOpen]);
+
+  useEffect(() => {
+    function handleGlobalKeyDown(event: KeyboardEvent) {
+      if (event.key !== "End" || event.repeat) {
+        return;
+      }
+
+      event.preventDefault();
+      const index = Math.floor(Math.random() * WORDS.length);
+      setChallenge(WORDS[index]);
+      setScore(0);
+      setLetter("");
+      setLettersUsed([]);
+      setWarning("");
+      setWarningType("error");
+      setDuplicateLetter("");
+
+      if (isRestartModalOpen) {
+        setIsRestartModalOpen(false);
+      }
+
+      focusInput();
+    }
+
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [isRestartModalOpen]);
+
   if (!challenge) {
     return;
   }
@@ -237,17 +317,33 @@ export default function App() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="restart-modal-title"
+            ref={modalRef}
             onClick={(event) => event.stopPropagation()}>
             <h2 id="restart-modal-title">Adivinhe</h2>
             <p>Você tem certeza que deseja reiniciar o jogo?</p>
             <span className={styles.modalNotice}>Você ainda tem {remainingAttempts} tentativas</span>
             <div className={styles.modalActions}>
-              <button type="button" className={styles.cancelButton} onClick={handleCancelRestart}>
+              <button
+                ref={cancelButtonRef}
+                type="button"
+                className={styles.cancelButton}
+                onClick={handleCancelRestart}>
                 Cancelar
               </button>
-              <button type="button" className={styles.confirmButton} autoFocus onClick={handleConfirmRestart}>
+              <button type="button" className={styles.confirmButton} onClick={handleConfirmRestart}>
                 Reiniciar
               </button>
+            </div>
+            <div className={styles.modalShortcuts} aria-label="Atalhos do teclado">
+              <span className={styles.modalShortcutsLabel}>Atalhos:</span>
+              <div className={styles.modalShortcutLines}>
+                <span>
+                  <kbd>End</kbd> Reiniciar direto (sem aviso)
+                </span>
+                <span>
+                  <kbd>Esc</kbd> Cancelar
+                </span>
+              </div>
             </div>
           </div>
         </div>
