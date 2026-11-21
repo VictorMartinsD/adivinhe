@@ -72,3 +72,77 @@
     animation-duration: 0.01ms;
   }
 }
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: rgb(36 36 83 / 55%);
+}
+
+.modal {
+  width: min(100%, 26rem);
+  padding: 2rem;
+  border: 2px solid #6363db;
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  box-shadow: 0 1rem 2.5rem rgb(36 36 83 / 25%);
+  text-align: center;
+}
+
+.modal h2 {
+  color: #6363db;
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.modal p {
+  color: #636363;
+  margin-bottom: 0.35rem;
+}
+
+.modalNotice {
+  display: block;
+  color: #6363db;
+  font-size: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.modalActions button {
+  min-width: 7rem;
+  padding: 0.65rem 1rem;
+  border-radius: 0.43rem;
+  font-weight: 700;
+}
+
+.cancelButton {
+  border: 2px solid #6363db;
+  background-color: #ffffff;
+  color: #6363db;
+}
+
+.confirmButton {
+  border: 2px solid #d27513;
+  background-color: #e8891c;
+  color: #ffffff;
+}
+
+@media (max-width: 35rem) {
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+
+  .modalActions button {
+    width: 100%;
+  }
+}

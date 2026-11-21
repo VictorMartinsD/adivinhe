@@ -26,8 +26,10 @@ export default function App() {
   const [warningType, setWarningType] = useState<"error" | "empty" | "duplicate" | "success">("error");
   const [duplicateLetter, setDuplicateLetter] = useState("");
   const [warningAnimationKey, setWarningAnimationKey] = useState(0);
+  const [isRestartModalOpen, setIsRestartModalOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const incorrectAttempts = lettersUsed.filter((used) => !used.correct).length;
+  const remainingAttempts = challenge ? challenge.word.length + ATTEMPTS_MARGIN - incorrectAttempts : 0;
 
   function focusInput() {
     requestAnimationFrame(() => inputRef.current?.focus());
@@ -47,12 +49,17 @@ export default function App() {
   }
 
   function handleRestartGame() {
-    const isConfirmed = window.confirm("Você tem certeza que deseja reiniciar?");
+    setIsRestartModalOpen(true);
+  }
 
-    if (isConfirmed) {
-      startGame();
-    }
+  function handleConfirmRestart() {
+    startGame();
+    setIsRestartModalOpen(false);
+    focusInput();
+  }
 
+  function handleCancelRestart() {
+    setIsRestartModalOpen(false);
     focusInput();
   }
 
@@ -153,71 +160,98 @@ export default function App() {
   }
 
   return (
-    <div className={styles.container}>
-      <main>
-        <Header
-          current={incorrectAttempts}
-          max={challenge.word.length + ATTEMPTS_MARGIN}
-          onRestart={handleRestartGame}
-        />
+    <>
+      <div className={styles.container}>
+        <main>
+          <Header
+            current={incorrectAttempts}
+            max={challenge.word.length + ATTEMPTS_MARGIN}
+            onRestart={handleRestartGame}
+          />
 
-        <Tip tip={challenge.tip} />
-        <p className={styles.accentNote}>Acentos e cedilha é opcional</p>
+          <Tip tip={challenge.tip} />
+          <p className={styles.accentNote}>Acentos e cedilha é opcional</p>
 
-        <div className={styles.word}>
-          {challenge.word.split("").map((letter, index) => {
-            const letterUsed = lettersUsed.find((used) => used.value.toUpperCase() === letter.toUpperCase());
+          <div className={styles.word}>
+            {challenge.word.split("").map((letter, index) => {
+              const letterUsed = lettersUsed.find((used) => used.value.toUpperCase() === letter.toUpperCase());
 
-            return <Letter key={index} value={letterUsed?.value} color={letterUsed?.correct ? "correct" : "default"} />;
-          })}
-        </div>
+              return (
+                <Letter key={index} value={letterUsed?.value} color={letterUsed?.correct ? "correct" : "default"} />
+              );
+            })}
+          </div>
 
-        <h4>Palpite</h4>
+          <h4>Palpite</h4>
 
-        <form
-          className={styles.guess}
-          onSubmit={(event) => {
-            event.preventDefault();
-            HandleConfirm();
-          }}>
-          <Input
-            ref={inputRef}
-            autoFocus
-            maxLength={1}
-            placeholder="?"
-            value={letter}
-            pattern="[A-Za-z]"
-            onChange={(e) => {
-              const value = sanitizeLetterInput(e.target.value);
-              setLetter(value);
+          <form
+            className={styles.guess}
+            onSubmit={(event) => {
+              event.preventDefault();
+              HandleConfirm();
+            }}>
+            <Input
+              ref={inputRef}
+              autoFocus
+              maxLength={1}
+              placeholder="?"
+              value={letter}
+              pattern="[A-Za-z]"
+              onChange={(e) => {
+                const value = sanitizeLetterInput(e.target.value);
+                setLetter(value);
 
-              if (warningType === "empty" && value.trim()) {
-                clearWarning();
-              }
-
-              if (warningType === "duplicate") {
-                const normalizedValue = value.trim().toUpperCase();
-
-                if (normalizedValue && normalizedValue !== duplicateLetter) {
+                if (warningType === "empty" && value.trim()) {
                   clearWarning();
                 }
-              }
-            }}
-          />
-          <Button title="Confirmar" type="submit" />
-          {warning && (
-            <span
-              key={warningAnimationKey}
-              className={`${styles.warning} ${warningType === "success" ? styles.success : ""}`}
-              role="status"
-              aria-live="polite">
-              {warning}
-            </span>
-          )}
-        </form>
 
-        <LettersUsed data={lettersUsed} />
-      </main>
-    </div>
+                if (warningType === "duplicate") {
+                  const normalizedValue = value.trim().toUpperCase();
+
+                  if (normalizedValue && normalizedValue !== duplicateLetter) {
+                    clearWarning();
+                  }
+                }
+              }}
+            />
+            <Button title="Confirmar" type="submit" />
+            {warning && (
+              <span
+                key={warningAnimationKey}
+                className={`${styles.warning} ${warningType === "success" ? styles.success : ""}`}
+                role="status"
+                aria-live="polite">
+                {warning}
+              </span>
+            )}
+          </form>
+
+          <LettersUsed data={lettersUsed} />
+        </main>
+      </div>
+
+      {isRestartModalOpen && (
+        <div className={styles.modalOverlay} role="presentation" onClick={handleCancelRestart}>
+          <div
+            className={styles.modal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="restart-modal-title"
+            onClick={(event) => event.stopPropagation()}>
+            <h2 id="restart-modal-title">Adivinhe</h2>
+            <p>Você tem certeza que deseja reiniciar o jogo?</p>
+            <span className={styles.modalNotice}>Você ainda tem {remainingAttempts} tentativas</span>
+            <div className={styles.modalActions}>
+              <button type="button" className={styles.cancelButton} onClick={handleCancelRestart}>
+                Cancelar
+              </button>
+              <button type="button" className={styles.confirmButton} autoFocus onClick={handleConfirmRestart}>
+                Reiniciar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
