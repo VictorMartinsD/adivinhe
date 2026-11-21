@@ -1,5 +1,5 @@
 import styles from "@/app.module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { WORDS, type Challenge } from "@/utils/words";
 import { Tip } from "@/components/Tip";
 import { Button } from "@/components/Button";
@@ -15,6 +15,11 @@ export default function App() {
   const [letter, setLetter] = useState("");
   const [lettersUsed, setLettersUsed] = useState<LettersUsedProps[]>([]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function focusInput() {
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }
 
   function handleRestartGame() {
     const isConfirmed = window.confirm("Você tem certeza que deseja reiniciar?");
@@ -22,6 +27,8 @@ export default function App() {
     if (isConfirmed) {
       startGame();
     }
+
+    focusInput();
   }
 
   function startGame() {
@@ -41,7 +48,9 @@ export default function App() {
     }
 
     if (!letter.trim()) {
-      return alert("Digite uma letra!");
+      alert("Digite uma letra!");
+      focusInput();
+      return;
     }
 
     const value = letter.toUpperCase();
@@ -49,7 +58,9 @@ export default function App() {
 
     if (exists) {
       setLetter("");
-      return alert("Você já utilizou a letra " + value);
+      alert("Você já utilizou a letra " + value);
+      focusInput();
+      return;
     }
 
     const hits = challenge.word
@@ -63,11 +74,13 @@ export default function App() {
     setLettersUsed((prevState) => [...prevState, { value, correct }]);
     setScore(currentScore);
     setLetter("");
+    focusInput();
   }
 
   function endGame(message: string) {
     alert(message);
     startGame();
+    focusInput();
   }
 
   useEffect(() => {
@@ -117,10 +130,23 @@ export default function App() {
 
         <h4>Palpite</h4>
 
-        <div className={styles.guess}>
-          <Input autoFocus maxLength={1} placeholder="?" value={letter} onChange={(e) => setLetter(e.target.value)} />
-          <Button title="Confirmar" onClick={HandleConfirm} />
-        </div>
+        <form
+          className={styles.guess}
+          onSubmit={(event) => {
+            event.preventDefault();
+            HandleConfirm();
+          }}
+        >
+          <Input
+            ref={inputRef}
+            autoFocus
+            maxLength={1}
+            placeholder="?"
+            value={letter}
+            onChange={(e) => setLetter(e.target.value)}
+          />
+          <Button title="Confirmar" type="submit" />
+        </form>
 
         <LettersUsed data={lettersUsed} />
       </main>
