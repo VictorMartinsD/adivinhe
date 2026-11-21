@@ -16,6 +16,7 @@ export default function App() {
   const [lettersUsed, setLettersUsed] = useState<LettersUsedProps[]>([]);
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const incorrectAttempts = lettersUsed.filter((used) => !used.correct).length;
 
   function focusInput() {
     requestAnimationFrame(() => inputRef.current?.focus());
@@ -99,11 +100,11 @@ export default function App() {
 
       const attemptLimit = challenge.word.length + ATTEMPTS_MARGIN;
 
-      if (lettersUsed.length === attemptLimit) {
+      if (incorrectAttempts === attemptLimit) {
         return endGame("Que pena, você usou todas as tentativas!");
       }
     }, 200);
-  }, [score, lettersUsed.length]);
+  }, [score, incorrectAttempts]);
 
   if (!challenge) {
     return;
@@ -113,7 +114,7 @@ export default function App() {
     <div className={styles.container}>
       <main>
         <Header
-          current={lettersUsed.length}
+          current={incorrectAttempts}
           max={challenge.word.length + ATTEMPTS_MARGIN}
           onRestart={handleRestartGame}
         />
