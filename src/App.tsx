@@ -308,6 +308,14 @@ export default function App() {
 
           <LettersUsed data={lettersUsed} />
         </main>
+
+        <footer className={styles.footer}>
+          Crafted with precision by{" "}
+          <a href="https://github.com/VictorMartinsD" target="_blank" rel="noopener noreferrer">
+            Victor Martins Dias
+          </a>{" "}
+          © 2026
+        </footer>
       </div>
 
       {isRestartModalOpen && (

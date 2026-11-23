@@ -19,6 +19,24 @@
   border-radius: 0.75rem;
 }
 
+.footer {
+  width: 100%;
+  margin-top: 1rem;
+  color: #636363;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.footer a {
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer a:hover,
+.footer a:focus-visible {
+  color: #6363db;
+}
+
 .accentNote {
   color: #6363db;
   font-size: 0.75rem;
