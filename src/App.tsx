@@ -32,6 +32,7 @@ export default function App() {
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const incorrectAttempts = lettersUsed.filter((used) => !used.correct).length;
   const remainingAttempts = challenge ? challenge.word.length + ATTEMPTS_MARGIN - incorrectAttempts : 0;
+  const [shake, setShake] = useState(false);
 
   function focusInput() {
     requestAnimationFrame(() => inputRef.current?.focus());
@@ -112,6 +113,11 @@ export default function App() {
     setScore(currentScore);
     setLetter("");
     focusInput();
+
+    if (!correct) {
+      setShake(true);
+      setTimeout(() => setShake(false), 300);
+    }
   }
 
   useEffect(() => {
@@ -252,7 +258,7 @@ export default function App() {
           <Tip tip={challenge.tip} />
           <p className={styles.accentNote}>Acentos e cedilha é opcional</p>
 
-          <div className={styles.word}>
+          <div className={`${styles.word} ${shake && styles.shake}`}>
             {challenge.word.split("").map((letter, index) => {
               const letterUsed = lettersUsed.find((used) => used.value.toUpperCase() === letter.toUpperCase());
 
@@ -331,11 +337,7 @@ export default function App() {
             <p>Você tem certeza que deseja reiniciar o jogo?</p>
             <span className={styles.modalNotice}>Você ainda tem {remainingAttempts} tentativas</span>
             <div className={styles.modalActions}>
-              <button
-                ref={cancelButtonRef}
-                type="button"
-                className={styles.cancelButton}
-                onClick={handleCancelRestart}>
+              <button ref={cancelButtonRef} type="button" className={styles.cancelButton} onClick={handleCancelRestart}>
                 Cancelar
               </button>
               <button type="button" className={styles.confirmButton} onClick={handleConfirmRestart}>
